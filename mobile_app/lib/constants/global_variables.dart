@@ -12,9 +12,16 @@ class GlobalVariables {
 
   static TextStyle titleText = TextStyle(
     color: primaryColor,
-    letterSpacing: 0.1,
+    letterSpacing: 0.2,
     fontSize: 25,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w800,
+  );
+
+  static TextStyle headingText = TextStyle(
+    color: primaryColor,
+    letterSpacing: 0.2,
+    fontSize: 25,
+    fontWeight: FontWeight.w800,
   );
 
   static TextStyle infoText = TextStyle(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/features/wallpapers/presentation/blocs/bloc/wallpaper_bloc.dart';
 import 'package:mobile_app/features/wallpapers/presentation/pages/home_page.dart';
 
 void main() {
@@ -11,17 +13,22 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Wallpaper App',
-      darkTheme: ThemeData.dark(),
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: Colors.white,
-        appBarTheme: AppBarTheme(iconTheme: IconThemeData(color: Colors.white)),
-        colorScheme: .fromSeed(seedColor: Colors.blue),
+    return MultiBlocProvider(
+      providers: [BlocProvider(create: (context) => WallpaperBloc())],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Wallpaper App',
+        darkTheme: ThemeData.dark(),
+        theme: ThemeData(
+          useMaterial3: true,
+          scaffoldBackgroundColor: Colors.white,
+          appBarTheme: AppBarTheme(
+            iconTheme: IconThemeData(color: Colors.white),
+          ),
+          colorScheme: .fromSeed(seedColor: Colors.blue),
+        ),
+        home: const HomePage(),
       ),
-      home: const HomePage(),
     );
   }
 }
