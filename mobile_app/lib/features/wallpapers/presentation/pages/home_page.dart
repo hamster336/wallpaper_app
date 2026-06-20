@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/constants/global_variables.dart';
@@ -5,6 +7,7 @@ import 'package:mobile_app/features/wallpapers/presentation/blocs/bloc/wallpaper
 import 'package:mobile_app/features/wallpapers/presentation/widgets/alert_dialog.dart';
 import 'package:mobile_app/features/wallpapers/presentation/widgets/wallapaper_shimmer_card.dart';
 import 'package:mobile_app/features/wallpapers/presentation/widgets/wallpaper_card.dart';
+import 'package:mobile_app/features/wallpapers/presentation/widgets/wallpaper_grid.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,19 +26,25 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Wallpapers', style: GlobalVariables.titleText),
-      ),
       body: BlocListener<WallpaperBloc, WallpaperState>(
         listener: (context, state) {
           if (state is WallpaperError) {
             customAlertBox(context, 'Could not load wallpapers :(');
           }
         },
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Padding(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              title: Text('Wallpapers', style: GlobalVariables.titleText),
+              backgroundColor: Colors.white,
+              surfaceTintColor: null,
+              floating: true,
+              snap: true,
+              scrolledUnderElevation: 0,
+            ),
+
+            SliverToBoxAdapter(
+              child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: SearchBar(
                   padding: WidgetStatePropertyAll(
@@ -50,8 +59,12 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              Padding(
+            ),
+
+            SliverToBoxAdapter(child: const SizedBox(height: 20)),
+
+            SliverToBoxAdapter(
+              child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: Row(
                   mainAxisAlignment: .start,
@@ -63,17 +76,40 @@ class _HomePageState extends State<HomePage> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+
+                    Spacer(),
+
+                    GestureDetector(
+                      onTap: () {},
+                      child: Row(
+                        mainAxisSize: .min,
+                        children: [
+                          const Text(
+                            'See all',
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Icon(Icons.chevron_right, color: Colors.red),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
+            ),
 
-              const SizedBox(height: 10),
+            SliverToBoxAdapter(child: const SizedBox(height: 10)),
 
-              SizedBox(
+            SliverToBoxAdapter(
+              child: SizedBox(
                 height: 200,
                 child: BlocBuilder<WallpaperBloc, WallpaperState>(
                   builder: (context, state) {
                     if (state is WallpaperLoading) {
+                      // return Center(child: const Text('Abhi data nahi hai :('));
                       return Padding(
                         padding: const EdgeInsets.only(right: 10),
                         child: ListView(
@@ -111,12 +147,21 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
               ),
+            ),
 
-              const SizedBox(height: 10),
+            SliverToBoxAdapter(child: const SizedBox(height: 10)),
 
-              
-            ],
-          ),
+            BlocBuilder<WallpaperBloc, WallpaperState>(
+              builder: (context, state) {
+                return WallpaperGrid(
+                  wallpapers: [],
+                  isLoading: true,
+                  onCardTap: null,
+                  onFavoriteTap: null,
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

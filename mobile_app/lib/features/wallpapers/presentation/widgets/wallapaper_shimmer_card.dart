@@ -9,6 +9,7 @@ class WallpaperShimmerCard extends StatelessWidget {
     return Shimmer.fromColors(
       baseColor: Colors.grey[300]!,
       highlightColor: Colors.grey[100]!,
+      period: Duration(milliseconds: 1500),
       child: Container(
         margin: EdgeInsets.only(left: 10),
         width: 150,
