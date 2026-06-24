@@ -63,10 +63,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             // appBar
             SliverAppBar(
               title: Text('Wallpapers', style: GlobalVariables.titleText),
-              backgroundColor: Colors.white,
               surfaceTintColor: null,
               floating: true,
               snap: true,
+              elevation: 0,
               scrolledUnderElevation: 0,
             ),
 
@@ -85,17 +85,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         EdgeInsets.symmetric(horizontal: 20),
                       ),
                       elevation: WidgetStatePropertyAll(0),
-                      backgroundColor: WidgetStatePropertyAll(
-                        Colors.grey.shade200,
-                      ),
                       leading: Icon(
                         Icons.search,
-                        color: Colors.grey.shade600,
+                        // color: Colors.grey.shade600,
                         size: 18,
                       ),
                       hintText: "Search People, Mood, Fashion",
                       hintStyle: WidgetStatePropertyAll(
-                        TextStyle(color: Colors.black54, fontSize: 14),
+                        TextStyle(fontSize: 14),
                       ),
                     ),
                   ),

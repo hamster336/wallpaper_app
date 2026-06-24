@@ -40,10 +40,10 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             useMaterial3: true,
             scaffoldBackgroundColor: Colors.white,
-            appBarTheme: AppBarTheme(
-              iconTheme: IconThemeData(color: Colors.white),
-            ),
             colorScheme: .fromSeed(seedColor: Colors.blue),
+            appBarTheme: AppBarTheme(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            ),
           ),
           home: const HomePage(),
         ),

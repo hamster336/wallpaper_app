@@ -28,35 +28,33 @@ class _SearchPageState extends State<SearchPage> {
             floating: true,
             snap: true,
             scrolledUnderElevation: 0,
-            backgroundColor: Colors.white,
-            flexibleSpace: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 0,
+            leading: Padding(
+              padding: const EdgeInsets.only(
+                left: 8,
+                bottom: 2,
+              ), // ← Reduce padding
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Icon(Icons.arrow_back, size: 22),
+              ),
+            ),
+            leadingWidth: 40,
+            title: Padding(
+              padding: const EdgeInsets.only(right: 10, bottom: 2),
+              child: SearchBar(
+                controller: controller,
+                onSubmitted: (value) {
+                  context.read<WallpaperBloc>().add(
+                    SearchWallpaper(query: value, page: 1),
+                  );
+                },
+                padding: WidgetStatePropertyAll(
+                  EdgeInsets.symmetric(horizontal: 20),
                 ),
-                child: SearchBar(
-                  controller: controller,
-                  onSubmitted: (value) {
-                    context.read<WallpaperBloc>().add(
-                      SearchWallpaper(query: value, page: 1),
-                    );
-                  },
-                  padding: WidgetStatePropertyAll(
-                    EdgeInsets.symmetric(horizontal: 20),
-                  ),
-                  elevation: WidgetStatePropertyAll(0),
-                  backgroundColor: WidgetStatePropertyAll(Colors.grey.shade200),
-                  leading: Icon(
-                    Icons.search,
-                    color: Colors.grey.shade600,
-                    size: 18,
-                  ),
-                  hintText: "Search People, Mood, Fashion",
-                  hintStyle: WidgetStatePropertyAll(
-                    TextStyle(color: Colors.black54, fontSize: 14),
-                  ),
-                ),
+                elevation: WidgetStatePropertyAll(0),
+                leading: Icon(Icons.search, size: 18),
+                hintText: "Search People, Mood, Fashion",
+                hintStyle: WidgetStatePropertyAll(TextStyle(fontSize: 14)),
               ),
             ),
           ),
@@ -75,15 +73,15 @@ class _SearchPageState extends State<SearchPage> {
               } else if (state is WallpaperLoaded) {
                 final wallpapers = state.searchWallpapers;
 
-                // if (wallpapers.isEmpty) {
-                //   return SliverToBoxAdapter(
-                //     child: Expanded(
-                //       child: Center(
-                //         child: const Text('No wallpapers found :('),
-                //       ),
-                //     ),
-                //   );
-                // }
+                if (wallpapers.isEmpty && state.searched) {
+                  return SliverToBoxAdapter(
+                    child: Expanded(
+                      child: Center(
+                        child: const Text('No wallpapers found :('),
+                      ),
+                    ),
+                  );
+                }
                 return WallpaperGrid(
                   wallpapers: wallpapers,
                   isLoading: false,

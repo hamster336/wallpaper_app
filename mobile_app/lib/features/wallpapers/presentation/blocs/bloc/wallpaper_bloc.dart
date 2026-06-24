@@ -44,9 +44,11 @@ class WallpaperBloc extends Bloc<WallpaperEvent, WallpaperState> {
         page: event.page,
       );
       if (currentState is WallpaperLoaded) {
-        emit(currentState.copyWith(searchWallpapers: wallpapers));
+        emit(
+          currentState.copyWith(searchWallpapers: wallpapers, searched: true),
+        );
       } else {
-        emit(WallpaperLoaded(searchWallpapers: wallpapers));
+        emit(WallpaperLoaded(searchWallpapers: wallpapers, searched: true));
       }
     } catch (e) {
       emit(WallpaperError(message: e.toString()));
@@ -64,9 +66,16 @@ class WallpaperBloc extends Bloc<WallpaperEvent, WallpaperState> {
 
     if (cache.containsKey(key)) {
       if (currentState is WallpaperLoaded) {
-        emit(currentState.copyWith(homeWallpapers: cache[key]!));
+        emit(
+          currentState.copyWith(
+            homeWallpapers: cache[key]!,
+            searchWallpapers: [],
+          ),
+        );
       } else {
-        emit(WallpaperLoaded(homeWallpapers: cache[key]!));
+        emit(
+          WallpaperLoaded(homeWallpapers: cache[key]!, searchWallpapers: []),
+        );
       }
       return;
     }
@@ -76,9 +85,14 @@ class WallpaperBloc extends Bloc<WallpaperEvent, WallpaperState> {
       final wallpapers = await repo.searchWallpaper(event.query);
       cache[key] = wallpapers;
       if (currentState is WallpaperLoaded) {
-        emit(currentState.copyWith(homeWallpapers: wallpapers));
+        emit(
+          currentState.copyWith(
+            homeWallpapers: wallpapers,
+            searchWallpapers: [],
+          ),
+        );
       } else {
-        emit(WallpaperLoaded(homeWallpapers: wallpapers));
+        emit(WallpaperLoaded(homeWallpapers: wallpapers, searchWallpapers: []));
       }
     } catch (e) {
       emit(WallpaperError(message: e.toString()));
