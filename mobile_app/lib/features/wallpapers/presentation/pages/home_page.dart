@@ -1,11 +1,16 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_app/constants/global_variables.dart';
-import 'package:mobile_app/features/wallpapers/presentation/blocs/bloc/wallpaper_bloc.dart';
+import 'package:mobile_app/features/wallpapers/presentation/blocs/favorites_bloc/favorites_bloc.dart';
+import 'package:mobile_app/features/wallpapers/presentation/blocs/wallpaper_bloc/wallpaper_bloc.dart';
+import 'package:mobile_app/features/wallpapers/presentation/notifiers/liked_wallpaper_notifier.dart';
+import 'package:mobile_app/features/wallpapers/presentation/pages/detail_page.dart';
+import 'package:mobile_app/features/wallpapers/presentation/pages/favorites_page.dart';
 import 'package:mobile_app/features/wallpapers/presentation/pages/search_page.dart';
 import 'package:mobile_app/features/wallpapers/presentation/widgets/alert_dialog.dart';
-// import 'package:mobile_app/features/wallpapers/presentation/widgets/wallapaper_shimmer_card.dart';
-// import 'package:mobile_app/features/wallpapers/presentation/widgets/wallpaper_card.dart';
+import 'package:mobile_app/features/wallpapers/presentation/widgets/wallapaper_shimmer_card.dart';
+import 'package:mobile_app/features/wallpapers/presentation/widgets/wallpaper_card.dart';
 import 'package:mobile_app/features/wallpapers/presentation/widgets/wallpaper_grid.dart';
 
 class HomePage extends StatefulWidget {
@@ -17,7 +22,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late TabController _tabController;
+  late LikedWallpapersNotifier likedNotifier;
   final List<String> categories = [
+    'For you',
     'Trending',
     'Abstract',
     'Architecture',
@@ -38,12 +45,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     _tabController = TabController(length: categories.length, vsync: this);
     _tabController.addListener(_onTabChange);
-    context.read<WallpaperBloc>().add(CategoryWallpaper(query: 'trending'));
+
+    likedNotifier = context.read<FavoritesBloc>().likedNotifier;
+    context.read<WallpaperBloc>().add(CuratedWallpaper());
+    context.read<FavoritesBloc>().add(LoadFavorites());
   }
 
   void _onTabChange() {
-    // Fetch wallpapers based on selected category
     final selectedCategory = categories[_tabController.index];
+    log(selectedCategory);
     context.read<WallpaperBloc>().add(
       CategoryWallpaper(query: selectedCategory.toLowerCase()),
     );
@@ -52,17 +62,43 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocListener<WallpaperBloc, WallpaperState>(
-        listener: (context, state) {
-          if (state is WallpaperError) {
-            customAlertBox(context, 'Could not load wallpapers :(');
-          }
-        },
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<WallpaperBloc, WallpaperState>(
+            listenWhen: (previous, current) {
+              return previous is! WallpaperError && current is WallpaperError;
+            },
+            listener: (context, state) {
+              if (state is WallpaperError) {
+                customAlertBox(context, state.message);
+              }
+            },
+          ),
+
+          BlocListener<FavoritesBloc, FavoritesState>(
+            listenWhen: (previous, current) {
+              return previous is! FavoritesError && current is FavoritesError;
+            },
+            listener: (context, state) {
+              if (state is FavoritesError) {
+                customAlertBox(context, state.message);
+              }
+            },
+          ),
+        ],
         child: CustomScrollView(
           slivers: [
             // appBar
             SliverAppBar(
-              title: Text('Wallpapers', style: GlobalVariables.titleText),
+              title: Text(
+                'Wallpapers',
+                style: TextStyle(
+                  color: Colors.red.shade600,
+                  letterSpacing: 0.2,
+                  fontSize: 25,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               surfaceTintColor: null,
               floating: true,
               snap: true,
@@ -120,7 +156,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     Spacer(),
 
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              FavoritesPage(likedNotifier: likedNotifier),
+                        ),
+                      ),
                       child: Row(
                         mainAxisSize: .min,
                         children: [
@@ -146,51 +188,79 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 200,
-                child: BlocBuilder<WallpaperBloc, WallpaperState>(
+                child: BlocBuilder<FavoritesBloc, FavoritesState>(
                   builder: (context, state) {
-                    return Center(child: const Text('Abhi data nahi hai :('));
-                    // if (state is WallpaperLoading) {
-                    //   return Padding(
-                    //     padding: const EdgeInsets.only(right: 10),
-                    //     child: ListView(
-                    //       scrollDirection: .horizontal,
-                    //       children: [
-                    //         WallpaperShimmerCard(),
-                    //         WallpaperShimmerCard(),
-                    //         WallpaperShimmerCard(),
-                    //         WallpaperShimmerCard(),
-                    //       ],
-                    //     ),
-                    //   );
-                    // } else if (state is WallpaperLoaded) {
-                    // final favorites = state.favoriteWallpapers;
+                    if (state is FavoritesLoading) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: ListView(
+                          scrollDirection: .horizontal,
+                          children: [
+                            WallpaperShimmerCard(),
+                            WallpaperShimmerCard(),
+                            WallpaperShimmerCard(),
+                            WallpaperShimmerCard(),
+                          ],
+                        ),
+                      );
+                    } else if (state is FavoritesLoaded) {
+                      final favorites = state.favorites;
 
-                    //   if (favorites.isEmpty) {
-                    //     return const Text('No favorites :(');
-                    //   }
-                    //   return ListView.builder(
-                    //     scrollDirection: Axis.horizontal,
-                    //     itemCount: favorites.length,
-                    //     itemBuilder: (context, index) {
-                    //       return WallpaperCard(
-                    //         wallpaper: favorites[index],
-                    //         onTap: () {},
-                    //         onFavoriteTap: () {},
-                    //       );
-                    //     },
-                    //   );
-                    // } else if (state is WallpaperError) {
-                    //   return Center(child: const Text('Error occured :('));
-                    // } else {
-                    //   return SizedBox.shrink();
-                    // }
+                      if (favorites.isEmpty) {
+                        return Center(
+                          child: const Text('Your favorites will appear here.'),
+                        );
+                      }
+                      return ListView.builder(
+                        padding: EdgeInsets.only(right: 10),
+                        scrollDirection: Axis.horizontal,
+                        itemCount: (favorites.length <= 5)
+                            ? favorites.length
+                            : 6,
+                        itemBuilder: (context, index) {
+                          if (index == 5) {
+                            return Container(
+                              margin: EdgeInsets.only(left: 15),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.red,
+                              ),
+                              child: Icon(
+                                Icons.keyboard_arrow_right_rounded,
+                                color: Colors.white,
+                              ),
+                            );
+                          }
+
+                          final favorite = favorites[index];
+                          return WallpaperCard(
+                            wallpaper: favorite,
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => WallpaperDetailPage(
+                                  wallpaper: favorite,
+                                  likedNotifier: likedNotifier,
+                                ),
+                              ),
+                            ),
+                            likedNotifier: likedNotifier,
+                            showLike: false,
+                          );
+                        },
+                      );
+                    } else if (state is FavoritesError) {
+                      return Center(child: const Text('Error occured :('));
+                    } else {
+                      return SizedBox.shrink();
+                    }
                   },
                 ),
               ),
             ),
             SliverToBoxAdapter(child: const SizedBox(height: 10)),
 
-            //
+            // tab Bar
             SliverToBoxAdapter(
               child: SingleChildScrollView(
                 padding: .zero,
@@ -201,7 +271,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   dividerColor: null,
                   isScrollable: true,
                   indicatorColor: Colors.red,
-                  indicatorWeight: 3,
+                  indicatorWeight: 2,
+                  indicatorAnimation: TabIndicatorAnimation.elastic,
                   labelColor: Colors.red,
                   unselectedLabelColor: Colors.grey,
                   tabs: categories.map((c) => Tab(text: c)).toList(),
@@ -217,10 +288,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     wallpapers: [],
                     isLoading: true,
                     onCardTap: null,
-                    onFavoriteTap: null,
                   );
                 } else if (state is WallpaperLoaded) {
-                  final wallpapers = state.homeWallpapers;
+                  final wallpapers = state.categoryWallpapers;
 
                   if (wallpapers.isEmpty) {
                     return SliverToBoxAdapter(
@@ -232,8 +302,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   return WallpaperGrid(
                     wallpapers: wallpapers,
                     isLoading: false,
-                    onCardTap: null,
-                    onFavoriteTap: null,
+                    onCardTap: (wallpaper) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => WallpaperDetailPage(
+                            wallpaper: wallpaper,
+                            likedNotifier: likedNotifier,
+                          ),
+                        ),
+                      );
+                    },
                   );
                 } else if (state is WallpaperError) {
                   return SliverToBoxAdapter(
@@ -244,6 +323,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 return SliverToBoxAdapter(child: SizedBox.shrink());
               },
             ),
+
+            BlocBuilder<WallpaperBloc, WallpaperState>(
+              builder: (context, state) {
+                if (state is WallpaperLoaded &&
+                    state.categoryWallpapers.isNotEmpty) {
+                  return SliverToBoxAdapter(
+                    child: Center(
+                      child: const Text(
+                        'Explore more using the search bar....',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  );
+                }
+                return SliverToBoxAdapter(child: SizedBox.shrink());
+              },
+            ),
+            SliverToBoxAdapter(child: const SizedBox(height: 10)),
           ],
         ),
       ),

@@ -8,28 +8,25 @@ final class WallpaperLoading extends WallpaperState {}
 
 final class WallpaperLoaded extends WallpaperState {
   final bool searched;
-  final List<WallpaperEntity> homeWallpapers;
+  final List<WallpaperEntity> categoryWallpapers;
   final List<WallpaperEntity> searchWallpapers;
-  final List<WallpaperEntity> favoriteWallpapers;
 
   WallpaperLoaded({
     this.searched = false,
-    this.homeWallpapers = const [],
+    this.categoryWallpapers = const [],
     this.searchWallpapers = const [],
-    this.favoriteWallpapers = const [],
   });
 
   WallpaperLoaded copyWith({
     bool? searched,
-    List<WallpaperEntity>? homeWallpapers,
+    List<WallpaperEntity>? categoryWallpapers,
     List<WallpaperEntity>? searchWallpapers,
     List<WallpaperEntity>? favoriteWallpapers,
   }) {
     return WallpaperLoaded(
       searched: searched ?? this.searched,
-      homeWallpapers: homeWallpapers ?? this.homeWallpapers,
+      categoryWallpapers: categoryWallpapers ?? this.categoryWallpapers,
       searchWallpapers: searchWallpapers ?? this.searchWallpapers,
-      favoriteWallpapers: favoriteWallpapers ?? this.favoriteWallpapers,
     );
   }
 }

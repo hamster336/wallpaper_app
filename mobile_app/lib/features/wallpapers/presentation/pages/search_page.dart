@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mobile_app/features/wallpapers/presentation/blocs/bloc/wallpaper_bloc.dart';
+import 'package:mobile_app/features/wallpapers/presentation/blocs/favorites_bloc/favorites_bloc.dart';
+import 'package:mobile_app/features/wallpapers/presentation/blocs/wallpaper_bloc/wallpaper_bloc.dart';
+import 'package:mobile_app/features/wallpapers/presentation/pages/detail_page.dart';
 import 'package:mobile_app/features/wallpapers/presentation/widgets/wallpaper_grid.dart';
 
 class SearchPage extends StatefulWidget {
@@ -12,6 +14,7 @@ class SearchPage extends StatefulWidget {
 
 class _SearchPageState extends State<SearchPage> {
   final controller = TextEditingController();
+  bool autoFocus = true;
 
   @override
   void dispose() {
@@ -22,82 +25,101 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            floating: true,
-            snap: true,
-            scrolledUnderElevation: 0,
-            leading: Padding(
-              padding: const EdgeInsets.only(
-                left: 8,
-                bottom: 2,
-              ), // ← Reduce padding
-              child: GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Icon(Icons.arrow_back, size: 22),
-              ),
-            ),
-            leadingWidth: 40,
-            title: Padding(
-              padding: const EdgeInsets.only(right: 10, bottom: 2),
-              child: SearchBar(
-                controller: controller,
-                onSubmitted: (value) {
-                  context.read<WallpaperBloc>().add(
-                    SearchWallpaper(query: value, page: 1),
-                  );
-                },
-                padding: WidgetStatePropertyAll(
-                  EdgeInsets.symmetric(horizontal: 20),
-                ),
-                elevation: WidgetStatePropertyAll(0),
-                leading: Icon(Icons.search, size: 18),
-                hintText: "Search People, Mood, Fashion",
-                hintStyle: WidgetStatePropertyAll(TextStyle(fontSize: 14)),
-              ),
-            ),
-          ),
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Icon(Icons.arrow_back, size: 22),
+                    ),
 
-          SliverToBoxAdapter(child: const SizedBox(height: 10)),
+                    const SizedBox(width: 10),
 
-          BlocBuilder<WallpaperBloc, WallpaperState>(
-            builder: (context, state) {
-              if (state is WallpaperLoading) {
-                return WallpaperGrid(
-                  wallpapers: [],
-                  isLoading: true,
-                  onCardTap: null,
-                  onFavoriteTap: null,
-                );
-              } else if (state is WallpaperLoaded) {
-                final wallpapers = state.searchWallpapers;
-
-                if (wallpapers.isEmpty && state.searched) {
-                  return SliverToBoxAdapter(
-                    child: Expanded(
-                      child: Center(
-                        child: const Text('No wallpapers found :('),
+                    Flexible(
+                      child: SearchBar(
+                        controller: controller,
+                        autoFocus: autoFocus,
+                        onSubmitted: (value) {
+                          if (value.trim().isNotEmpty) {
+                            context.read<WallpaperBloc>().add(
+                              SearchWallpaper(query: value, page: 1),
+                            );
+                          }
+                        },
+                        padding: WidgetStatePropertyAll(
+                          EdgeInsets.symmetric(horizontal: 20),
+                        ),
+                        elevation: WidgetStatePropertyAll(0),
+                        leading: Icon(Icons.search, size: 18),
+                        hintText: "Search People, Mood, Fashion",
+                        hintStyle: WidgetStatePropertyAll(
+                          TextStyle(fontSize: 14),
+                        ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+            ),
+
+            SliverToBoxAdapter(child: const SizedBox(height: 10)),
+
+            BlocBuilder<WallpaperBloc, WallpaperState>(
+              builder: (context, state) {
+                if (state is WallpaperLoading) {
+                  return WallpaperGrid(
+                    wallpapers: null,
+                    isLoading: true,
+                    onCardTap: null,
+                  );
+                } else if (state is WallpaperLoaded) {
+                  final wallpapers = state.searchWallpapers;
+
+                  if (wallpapers.isEmpty && state.searched) {
+                    return SliverToBoxAdapter(
+                      child: Expanded(
+                        child: Center(
+                          child: const Text('No wallpapers found :('),
+                        ),
+                      ),
+                    );
+                  }
+                  return WallpaperGrid(
+                    wallpapers: wallpapers,
+                    isLoading: false,
+                    onCardTap: (wallpaper) {
+                      // When returning from detail page, set autoFocus to false
+                      setState(() => autoFocus = false);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => WallpaperDetailPage(
+                            wallpaper: wallpaper,
+                            likedNotifier: context
+                                .read<FavoritesBloc>()
+                                .likedNotifier,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                } else if (state is WallpaperError) {
+                  return SliverToBoxAdapter(
+                    child: Center(child: const Text('Error :(')),
                   );
                 }
-                return WallpaperGrid(
-                  wallpapers: wallpapers,
-                  isLoading: false,
-                  onCardTap: null,
-                  onFavoriteTap: null,
-                );
-              } else if (state is WallpaperError) {
-                return SliverToBoxAdapter(
-                  child: Center(child: const Text('Error :(')),
-                );
-              }
 
-              return SliverToBoxAdapter(child: SizedBox.shrink());
-            },
-          ),
-        ],
+                return SliverToBoxAdapter(child: SizedBox.shrink());
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

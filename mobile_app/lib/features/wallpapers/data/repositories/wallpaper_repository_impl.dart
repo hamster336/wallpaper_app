@@ -1,3 +1,4 @@
+import 'package:mobile_app/features/wallpapers/data/datasources/favorites_local_storage.dart';
 import 'package:mobile_app/features/wallpapers/data/datasources/wallpaper_remote_datasoruce.dart';
 import 'package:mobile_app/features/wallpapers/data/models/wallpaper_model.dart';
 import 'package:mobile_app/features/wallpapers/domain/entities/wallpaper_entity.dart';
@@ -16,8 +17,7 @@ class WallpaperRepositoryImpl extends WallpaperRepository {
       imageUrl: model.src.portrait, // extract portrait for mobile
       photographer: model.photographer,
       photographerUrl: model.photographerUrl,
-      title: model.alt, // rename alt to title
-      liked: model.liked,
+      title: model.alt,
     );
   }
 
@@ -31,8 +31,36 @@ class WallpaperRepositoryImpl extends WallpaperRepository {
   }
 
   @override
-  Future<List<WallpaperEntity>> curatedWallpaper({int page = 1}) {
-    // TODO: implement curatedWallpaper
-    throw UnimplementedError();
+  Future<List<WallpaperEntity>> curatedWallpaper() async{
+    final response = await remoteDataSource.getCuratedWallpapers();
+    return response.map((model) => modelToEntity(model)).toList();
+  }
+  
+  @override
+  Future<List<WallpaperEntity>> getFavorites() async{
+    try {
+      final favorites = await FavoritesServices.getAllLiked();
+      return favorites;
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+  
+  @override
+  Future<void> addToFavorite(WallpaperEntity wallpaper) async{
+    try {
+      await FavoritesServices.addLike(wallpaper);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+  
+  @override
+  Future<void> removeFromFavorite(int id) async{
+    try {
+      await FavoritesServices.removeLike(id);
+    } catch (e) {
+      throw Exception(e.toString());
+    }
   }
 }

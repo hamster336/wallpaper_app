@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_app/features/wallpapers/presentation/blocs/favorites_bloc/favorites_bloc.dart';
 import 'package:mobile_app/features/wallpapers/presentation/widgets/wallapaper_shimmer_card.dart';
 import 'package:mobile_app/features/wallpapers/presentation/widgets/wallpaper_card.dart';
 import 'package:mobile_app/features/wallpapers/domain/entities/wallpaper_entity.dart';
@@ -6,15 +8,15 @@ import 'package:mobile_app/features/wallpapers/domain/entities/wallpaper_entity.
 class WallpaperGrid extends StatelessWidget {
   final List<WallpaperEntity>? wallpapers;
   final bool isLoading;
-  final VoidCallback Function(WallpaperEntity)? onCardTap;
-  final VoidCallback Function(WallpaperEntity)? onFavoriteTap;
+  final Function(WallpaperEntity)? onCardTap;
+  final bool showLike;
 
   const WallpaperGrid({
     super.key,
     required this.wallpapers,
     required this.isLoading,
     this.onCardTap,
-    this.onFavoriteTap,
+    this.showLike = true,
   });
 
   @override
@@ -43,12 +45,12 @@ class WallpaperGrid extends StatelessWidget {
       padding: EdgeInsetsGeometry.only(right: 10, bottom: 10),
       sliver: SliverGrid(
         delegate: SliverChildBuilderDelegate((context, index) {
+          final wallpaper = wallpapers![index];
           return WallpaperCard(
-            wallpaper: wallpapers![index],
-            onTap: () => {},
-            onFavoriteTap: () => {},
-            // onTap: () =>  onCardTap(wallpapers![index]),
-            // onFavoriteTap: () => onFavoriteTap(wallpapers![index]),
+            wallpaper: wallpaper,
+            onTap: () => onCardTap!(wallpaper),
+            likedNotifier: context.read<FavoritesBloc>().likedNotifier,
+            showLike: showLike,
           );
         }, childCount: wallpapers?.length ?? 0),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

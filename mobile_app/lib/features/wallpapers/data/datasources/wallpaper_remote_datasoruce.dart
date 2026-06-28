@@ -6,7 +6,7 @@ import 'package:mobile_app/features/wallpapers/data/models/wallpaper_model.dart'
 
 abstract class WallpaperRemoteDatasoruce {
   Future<List<Wallpaper>> searchWallpapers(String query, {int page = 1});
-  Future<List<Wallpaper>> getCuratedWallpapers({int page = 1});
+  Future<List<Wallpaper>> getCuratedWallpapers();
 }
 
 class WallpaperRemoteDataSourceImpl extends WallpaperRemoteDatasoruce {
@@ -38,11 +38,13 @@ class WallpaperRemoteDataSourceImpl extends WallpaperRemoteDatasoruce {
   }
 
   @override
-  Future<List<Wallpaper>> getCuratedWallpapers({int page = 1}) async {
+  Future<List<Wallpaper>> getCuratedWallpapers() async {
     try {
       final response = await httpClient
           .get(
-            Uri.parse('${ApiConfig.baseUrl}/api/wallpapers/curated?page=$page'),
+            Uri.parse(
+              '${ApiConfig.baseUrl}/api/wallpapers/curated',
+            ),
           )
           .timeout(Duration(seconds: 10));
 

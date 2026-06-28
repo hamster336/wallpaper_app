@@ -3,5 +3,11 @@ import 'package:mobile_app/features/wallpapers/domain/entities/wallpaper_entity.
 abstract class WallpaperRepository {
   Future<List<WallpaperEntity>> searchWallpaper(String query, {int page = 1});
 
-  Future<List<WallpaperEntity>> curatedWallpaper({int page = 1});
+  Future<List<WallpaperEntity>> curatedWallpaper();
+
+  Future<List<WallpaperEntity>> getFavorites();
+
+  Future<void> addToFavorite(WallpaperEntity wallpaper);
+
+  Future<void> removeFromFavorite(int id);
 }
