@@ -23,6 +23,7 @@ Wallpaper App is a full-stack mobile experience that combines:
 ## Tech Stack
 
 ### Mobile App
+
 - Flutter
 - Dart
 - flutter_bloc
@@ -32,6 +33,7 @@ Wallpaper App is a full-stack mobile experience that combines:
 - http
 
 ### Backend
+
 - Node.js
 - Express.js
 - Axios
@@ -151,21 +153,25 @@ Once the app is running:
 The app is organized around several wallpaper-focused sections:
 
 ### Home Screen
+
 - Displays curated wallpapers and category-based browsing
 - Lets users switch between categories such as For you, Trending, Abstract, Nature, and more
 - Provides quick access to the search experience
 
 ### Search Screen
+
 - Allows users to search wallpapers by keyword
 - Shows results dynamically as the user searches
 - Supports pagination and empty-state handling for no-result searches
 
 ### Wallpaper Detail Screen
+
 - Shows a larger view of the selected wallpaper
 - Includes actions to set the wallpaper for the home screen, lock screen, or both
 - Allows users to add or remove the wallpaper from favorites
 
 ### Favorites Screen
+
 - Stores liked wallpapers locally using Hive
 - Lets users revisit and manage favorite wallpapers easily
 
@@ -177,6 +183,17 @@ The screenshots show:
 - Search screen with search results
 - Wallpaper detail screen
 - Favorites screen
+
+Light Theme:
+
+<p align="left">
+  <img src="mobile_app/assets/screenshots/home_light.png" alt="Home Screen" width="200">
+  <img src="mobile_app/assets/screenshots/search_light.png" alt="Search Screen" width="200">
+  <img src="mobile_app/assets/screenshots/details_light.png" alt="Wallpaper Details Screen" width="200">
+  <img src="mobile_app/assets/screenshots/favorites_light.png" alt="Favorites Screen" width="200">
+</p>
+
+Dark Theme:
 
 <p align="left">
   <img src="mobile_app/assets/screenshots/home.png" alt="Home Screen" width="200">
