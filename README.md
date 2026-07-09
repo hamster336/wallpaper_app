@@ -179,10 +179,10 @@ The screenshots show:
 - Favorites screen
 
 <p align="left">
-  <img src="screenshots/home.png" width="200">
-  <img src="screenshots/search.png" width="200">
-  <img src="screenshots/details.png" width="200">
-  <img src="screenshots/favorites.png" width="200">
+  <img src="mobile_app/assets/screenshots/home.png" alt="Home Screen" width="200">
+  <img src="mobile_app/assets/screenshots/search.png" alt="Search Screen" width="200">
+  <img src="mobile_app/assets/screenshots/details.png" alt="Wallpaper Details Screen" width="200">
+  <img src="mobile_app/assets/screenshots/favorites.png" alt="Favorites Screen" width="200">
 </p>
 
 ## Development Notes
