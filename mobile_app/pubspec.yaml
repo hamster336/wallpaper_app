@@ -44,6 +44,8 @@ dependencies:
   hive_ce_flutter: ^2.3.4
   hive_ce_generator: ^1.11.1
   build_runner: ^2.15.0
+  intl: ^0.20.3
+  wallpaper: ^1.1.5
 
 dev_dependencies:
   flutter_test:

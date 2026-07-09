@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/features/wallpapers/presentation/blocs/favorites_bloc/favorites_bloc.dart';
@@ -47,13 +45,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _tabController.addListener(_onTabChange);
 
     likedNotifier = context.read<FavoritesBloc>().likedNotifier;
-    context.read<WallpaperBloc>().add(CuratedWallpaper());
+    context.read<WallpaperBloc>().add(CategoryWallpaper(query: "for you"));
     context.read<FavoritesBloc>().add(LoadFavorites());
   }
 
   void _onTabChange() {
     final selectedCategory = categories[_tabController.index];
-    log(selectedCategory);
     context.read<WallpaperBloc>().add(
       CategoryWallpaper(query: selectedCategory.toLowerCase()),
     );
@@ -196,6 +193,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                         child: ListView(
                           scrollDirection: .horizontal,
                           children: [
+                            WallpaperShimmerCard(),
                             WallpaperShimmerCard(),
                             WallpaperShimmerCard(),
                             WallpaperShimmerCard(),

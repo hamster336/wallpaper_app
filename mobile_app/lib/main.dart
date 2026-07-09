@@ -6,6 +6,7 @@ import 'package:mobile_app/features/wallpapers/data/datasources/favorites_local_
 import 'package:mobile_app/features/wallpapers/data/datasources/wallpaper_remote_datasoruce.dart';
 import 'package:mobile_app/features/wallpapers/data/repositories/wallpaper_repository_impl.dart';
 import 'package:mobile_app/features/wallpapers/presentation/blocs/favorites_bloc/favorites_bloc.dart';
+import 'package:mobile_app/features/wallpapers/presentation/blocs/wallpaper_action_bloc/wallpaper_action_bloc.dart';
 import 'package:mobile_app/features/wallpapers/presentation/blocs/wallpaper_bloc/wallpaper_bloc.dart';
 import 'package:mobile_app/features/wallpapers/presentation/notifiers/liked_wallpaper_notifier.dart';
 import 'package:mobile_app/features/wallpapers/presentation/pages/home_page.dart';
@@ -17,7 +18,7 @@ void main() async {
   await FavoritesServices.init();
 
   final likedNotifier = LikedWallpapersNotifier();
-  
+
   // Load all liked wallpapers into notifier at startup
   final favorites = await FavoritesServices.getAllLiked();
   likedNotifier.value = {for (var fav in favorites) fav.id};
@@ -28,7 +29,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     final likedNotifier = LikedWallpapersNotifier();
@@ -55,6 +55,7 @@ class MyApp extends StatelessWidget {
               likedNotifier: likedNotifier,
             ),
           ),
+          BlocProvider(create: (context) => WallpaperActionBloc()),
         ],
         child: MaterialApp(
           debugShowCheckedModeBanner: false,

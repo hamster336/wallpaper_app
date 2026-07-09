@@ -38,32 +38,28 @@ class _WallpaperCardState extends State<WallpaperCard> {
     return Padding(
       padding: const EdgeInsets.only(left: 10),
       child: GestureDetector(
-        onTap: widget.onTap, // Open detail screen
+        onTap: widget.onTap,
         child: Container(
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
           child: Stack(
             children: [
               ClipRRect(
                 borderRadius: .circular(15),
-                child:
-                    // Image.network(widget.wallpaper.imageUrl),
-                    CachedNetworkImage(
-                      imageUrl: widget.wallpaper.imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) =>
-                          Container(color: Colors.grey[300]),
-                      // errorWidget: (context, url, error) =>
-                      //     Icon(Icons.error), // ← Optional: customize cache
-                      errorWidget: (context, url, error) {
-                        log('Image load error: $error');
-                        log('URL: $url');
-                        return Container(
-                          color: Colors.grey[300],
-                          child: Icon(Icons.error, color: Colors.red),
-                        );
-                      },
-                      httpHeaders: {'User-Agent': 'Mozilla/5.0'},
-                    ),
+                child: CachedNetworkImage(
+                  imageUrl: widget.wallpaper.imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) =>
+                      Container(color: Colors.grey[300]),
+                  errorWidget: (context, url, error) {
+                    log('Image load error: $error');
+                    log('URL: $url');
+                    return Container(
+                      color: Colors.grey[300],
+                      child: Icon(Icons.error, color: Colors.red),
+                    );
+                  },
+                  httpHeaders: {'User-Agent': 'Mozilla/5.0'},
+                ),
               ),
 
               if (widget.showLike)

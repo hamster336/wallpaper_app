@@ -14,8 +14,6 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     : super(FavoritesInitial()) {
     on<LoadFavorites>(_loadFavorites);
     on<ToggleFavorite>(_toggleFavorite);
-    on<AddFavorite>(_addFavorite);
-    on<RemoveFavorite>(_removeFavorite);
   }
 
   List<WallpaperEntity> _favorites = [];
@@ -32,9 +30,6 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
         likedNotifier.removeLiked(event.wallpaper.id);
         _favorites.removeWhere((w) => w.id == event.wallpaper.id);
       } else {
-        await repo.addToFavorite(event.wallpaper);
-        likedNotifier.addLiked(event.wallpaper.id);
-
         final wallpaper = WallpaperEntity(
           id: event.wallpaper.id,
           width: event.wallpaper.width,
@@ -46,12 +41,17 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
           likedAt: DateTime.now(),
         );
 
+        await repo.addToFavorite(wallpaper);
+        likedNotifier.addLiked(wallpaper.id);
+
         _favorites.add(wallpaper);
       }
 
-      _favorites.sort((a, b) => 
-      (b.likedAt ?? DateTime(1970)).compareTo(a.likedAt ?? DateTime(1970))
-    );
+      _favorites.sort(
+        (a, b) => (b.likedAt ?? DateTime(1970)).compareTo(
+          a.likedAt ?? DateTime(1970),
+        ),
+      );
 
       emit(FavoritesLoaded(favorites: _favorites));
     } catch (e) {
@@ -74,38 +74,6 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
 
       _favorites = favorites;
       likedNotifier.value = {for (var fav in favorites) fav.id};
-
-      emit(FavoritesLoaded(favorites: _favorites));
-    } catch (e) {
-      emit(FavoritesError(message: e.toString()));
-    }
-  }
-
-  // add to favorites
-  Future<void> _addFavorite(
-    AddFavorite event,
-    Emitter<FavoritesState> emit,
-  ) async {
-    try {
-      await repo.addToFavorite(event.wallpaper);
-      _favorites.add(event.wallpaper);
-      likedNotifier.addLiked(event.wallpaper.id);
-
-      emit(FavoritesLoaded(favorites: _favorites));
-    } catch (e) {
-      emit(FavoritesError(message: e.toString()));
-    }
-  }
-
-  // remove from favorites
-  Future<void> _removeFavorite(
-    RemoveFavorite event,
-    Emitter<FavoritesState> emit,
-  ) async {
-    try {
-      await repo.removeFromFavorite(event.wallpaperId);
-      _favorites.removeWhere((w) => w.id == event.wallpaperId);
-      likedNotifier.removeLiked(event.wallpaperId);
 
       emit(FavoritesLoaded(favorites: _favorites));
     } catch (e) {

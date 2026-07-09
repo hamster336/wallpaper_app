@@ -10,6 +10,7 @@ class WallpaperGrid extends StatelessWidget {
   final bool isLoading;
   final Function(WallpaperEntity)? onCardTap;
   final bool showLike;
+  final int count;
 
   const WallpaperGrid({
     super.key,
@@ -17,6 +18,7 @@ class WallpaperGrid extends StatelessWidget {
     required this.isLoading,
     this.onCardTap,
     this.showLike = true,
+    this.count = 2,
   });
 
   @override
@@ -31,8 +33,8 @@ class WallpaperGrid extends StatelessWidget {
             childCount: 10,
           ),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.8,
+            crossAxisCount: count,
+            childAspectRatio: 0.7,
             crossAxisSpacing: 2,
             mainAxisSpacing: 8,
           ),
@@ -54,7 +56,7 @@ class WallpaperGrid extends StatelessWidget {
           );
         }, childCount: wallpapers?.length ?? 0),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: count,
           childAspectRatio: 0.7,
           crossAxisSpacing: 2,
           mainAxisSpacing: 8,

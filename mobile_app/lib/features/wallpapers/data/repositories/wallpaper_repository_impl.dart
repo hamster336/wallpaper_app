@@ -9,7 +9,7 @@ class WallpaperRepositoryImpl extends WallpaperRepository {
 
   WallpaperRepositoryImpl({required this.remoteDataSource});
 
-  WallpaperEntity modelToEntity(Wallpaper model) {
+  WallpaperEntity modelToEntity(WallpaperModel model) {
     return WallpaperEntity(
       id: model.id,
       width: model.width,
@@ -31,13 +31,13 @@ class WallpaperRepositoryImpl extends WallpaperRepository {
   }
 
   @override
-  Future<List<WallpaperEntity>> curatedWallpaper() async{
-    final response = await remoteDataSource.getCuratedWallpapers();
+  Future<List<WallpaperEntity>> curatedWallpaper({int page = 1}) async {
+    final response = await remoteDataSource.getCuratedWallpapers(page: page);
     return response.map((model) => modelToEntity(model)).toList();
   }
-  
+
   @override
-  Future<List<WallpaperEntity>> getFavorites() async{
+  Future<List<WallpaperEntity>> getFavorites() async {
     try {
       final favorites = await FavoritesServices.getAllLiked();
       return favorites;
@@ -45,18 +45,18 @@ class WallpaperRepositoryImpl extends WallpaperRepository {
       throw Exception(e.toString());
     }
   }
-  
+
   @override
-  Future<void> addToFavorite(WallpaperEntity wallpaper) async{
+  Future<void> addToFavorite(WallpaperEntity wallpaper) async {
     try {
       await FavoritesServices.addLike(wallpaper);
     } catch (e) {
       throw Exception(e.toString());
     }
   }
-  
+
   @override
-  Future<void> removeFromFavorite(int id) async{
+  Future<void> removeFromFavorite(int id) async {
     try {
       await FavoritesServices.removeLike(id);
     } catch (e) {

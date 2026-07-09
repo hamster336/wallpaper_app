@@ -1,0 +1,1 @@
+enum WallpaperType {home, lock, both}

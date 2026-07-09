@@ -1,6 +1,6 @@
 import 'package:mobile_app/features/wallpapers/data/models/src_model.dart';
 
-class Wallpaper {
+class WallpaperModel {
   int id;
   int width;
   int height;
@@ -13,7 +13,7 @@ class Wallpaper {
   bool liked;
   String alt;
 
-  Wallpaper({
+  WallpaperModel({
     required this.id,
     required this.width,
     required this.height,
@@ -27,8 +27,8 @@ class Wallpaper {
     required this.alt,
   });
 
-  factory Wallpaper.fromJson(Map<String, dynamic> json) {
-    return Wallpaper(
+  factory WallpaperModel.fromJson(Map<String, dynamic> json) {
+    return WallpaperModel(
       id: json['id'],
       width: json['width'],
       height: json['height'],

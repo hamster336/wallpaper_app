@@ -11,8 +11,8 @@ class WallpaperShimmerCard extends StatelessWidget {
       highlightColor: Colors.grey[100]!,
       period: Duration(milliseconds: 1500),
       child: Container(
+        width: 130,
         margin: EdgeInsets.only(left: 10),
-        width: 150,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),

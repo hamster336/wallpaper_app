@@ -13,13 +13,49 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  final controller = TextEditingController();
-  bool autoFocus = true;
+  final _textController = TextEditingController(); // for the search field
+  final _scrollController =
+      ScrollController(); // to track the screen postion for pagination
+  final FocusNode focusNode = FocusNode(); // search bar focuNode
+  late WallpaperBloc _wallpaperBloc;
+  String searchQuery = ''; // to track the search query for pagination
+  DateTime? _lastLoadMoreTime; // track last load time
+  static const Duration _loadMoreDelay = Duration(
+    seconds: 5,
+  ); // mimimum delay of 5 seconds between each load more wallpapers request.
+
+  @override
+  void initState() {
+    _wallpaperBloc = context.read<WallpaperBloc>();
+    _scrollController.addListener(_onScroll);
+    super.initState();
+  }
 
   @override
   void dispose() {
     super.dispose();
-    controller.dispose();
+    _wallpaperBloc.add(ClearSearch());
+    _textController.dispose();
+    _scrollController.dispose();
+  }
+
+  void _onScroll() {
+    final state = _wallpaperBloc.state;
+
+    if (state is WallpaperLoaded && state.isLoadingMore) return;
+    if (state is WallpaperLoaded && state.hasReachedMax) return;
+
+    final now = DateTime.now();
+    if (_lastLoadMoreTime != null &&
+        now.difference(_lastLoadMoreTime!) < _loadMoreDelay) {
+      return; // do not request load more if the last request was made less than _loadMoreDelay
+    }
+
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent * 0.9) {
+      _lastLoadMoreTime = now; // record the time for the last load more request
+      _wallpaperBloc.add(SearchWallpaperLoadMore(query: searchQuery));
+    }
   }
 
   @override
@@ -27,6 +63,7 @@ class _SearchPageState extends State<SearchPage> {
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
+          controller: _scrollController,
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
@@ -42,13 +79,13 @@ class _SearchPageState extends State<SearchPage> {
 
                     Flexible(
                       child: SearchBar(
-                        controller: controller,
-                        autoFocus: autoFocus,
+                        focusNode: focusNode,
+                        controller: _textController,
+                        autoFocus: true,
                         onSubmitted: (value) {
                           if (value.trim().isNotEmpty) {
-                            context.read<WallpaperBloc>().add(
-                              SearchWallpaper(query: value, page: 1),
-                            );
+                            searchQuery = value.trim();
+                            _wallpaperBloc.add(SearchWallpaper(query: value));
                           }
                         },
                         padding: WidgetStatePropertyAll(
@@ -81,6 +118,7 @@ class _SearchPageState extends State<SearchPage> {
                   final wallpapers = state.searchWallpapers;
 
                   if (wallpapers.isEmpty && state.searched) {
+                    // show no wallpapers only if user searches
                     return SliverToBoxAdapter(
                       child: Expanded(
                         child: Center(
@@ -93,8 +131,8 @@ class _SearchPageState extends State<SearchPage> {
                     wallpapers: wallpapers,
                     isLoading: false,
                     onCardTap: (wallpaper) {
-                      // When returning from detail page, set autoFocus to false
-                      setState(() => autoFocus = false);
+                      // When returning from detail page, remvove focus from search bar
+                      focusNode.unfocus();
 
                       Navigator.push(
                         context,
@@ -115,6 +153,29 @@ class _SearchPageState extends State<SearchPage> {
                   );
                 }
 
+                return SliverToBoxAdapter(child: SizedBox.shrink());
+              },
+            ),
+
+            BlocBuilder<WallpaperBloc, WallpaperState>(
+              builder: (context, state) {
+                if (state is WallpaperLoaded && state.isLoadingMore) {
+                  return SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(
+                        child: SizedBox(
+                          width: 35,
+                          height: 35,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }
                 return SliverToBoxAdapter(child: SizedBox.shrink());
               },
             ),

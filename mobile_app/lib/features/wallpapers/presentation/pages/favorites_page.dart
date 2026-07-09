@@ -72,6 +72,7 @@ class FavoritesPage extends StatelessWidget {
                     );
                   },
                   showLike: false,
+                  count: 3,
                 );
               } else if (state is FavoritesError) {
                 return SliverToBoxAdapter(

@@ -5,8 +5,8 @@ import 'dart:convert';
 import 'package:mobile_app/features/wallpapers/data/models/wallpaper_model.dart';
 
 abstract class WallpaperRemoteDatasoruce {
-  Future<List<Wallpaper>> searchWallpapers(String query, {int page = 1});
-  Future<List<Wallpaper>> getCuratedWallpapers();
+  Future<List<WallpaperModel>> searchWallpapers(String query, {int page = 1});
+  Future<List<WallpaperModel>> getCuratedWallpapers({int page = 1});
 }
 
 class WallpaperRemoteDataSourceImpl extends WallpaperRemoteDatasoruce {
@@ -15,7 +15,10 @@ class WallpaperRemoteDataSourceImpl extends WallpaperRemoteDatasoruce {
   WallpaperRemoteDataSourceImpl({required this.httpClient});
 
   @override
-  Future<List<Wallpaper>> searchWallpapers(String query, {int page = 1}) async {
+  Future<List<WallpaperModel>> searchWallpapers(
+    String query, {
+    int page = 1,
+  }) async {
     try {
       final uri = Uri.parse(
         '${ApiConfig.baseUrl}/api/wallpapers/search?query=$query&page=$page',
@@ -25,8 +28,8 @@ class WallpaperRemoteDataSourceImpl extends WallpaperRemoteDatasoruce {
 
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
-        final List<Wallpaper> wallpapers = (jsonData['photos'] as List)
-            .map((wallpaper) => Wallpaper.fromJson(wallpaper))
+        final List<WallpaperModel> wallpapers = (jsonData['photos'] as List)
+            .map((wallpaper) => WallpaperModel.fromJson(wallpaper))
             .toList();
         return wallpapers;
       } else {
@@ -38,20 +41,16 @@ class WallpaperRemoteDataSourceImpl extends WallpaperRemoteDatasoruce {
   }
 
   @override
-  Future<List<Wallpaper>> getCuratedWallpapers() async {
+  Future<List<WallpaperModel>> getCuratedWallpapers({int page = 1}) async {
     try {
       final response = await httpClient
-          .get(
-            Uri.parse(
-              '${ApiConfig.baseUrl}/api/wallpapers/curated',
-            ),
-          )
+          .get(Uri.parse('${ApiConfig.baseUrl}/api/wallpapers/curated'))
           .timeout(Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
-        final List<Wallpaper> wallpapers = (jsonData['photos'] as List)
-            .map((wallpaper) => Wallpaper.fromJson(wallpaper))
+        final List<WallpaperModel> wallpapers = (jsonData['photos'] as List)
+            .map((wallpaper) => WallpaperModel.fromJson(wallpaper))
             .toList();
         return wallpapers;
       } else {

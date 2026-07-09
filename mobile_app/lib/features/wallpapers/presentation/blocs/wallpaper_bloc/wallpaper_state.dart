@@ -10,23 +10,30 @@ final class WallpaperLoaded extends WallpaperState {
   final bool searched;
   final List<WallpaperEntity> categoryWallpapers;
   final List<WallpaperEntity> searchWallpapers;
+  final bool isLoadingMore;
+  final bool hasReachedMax;
 
   WallpaperLoaded({
     this.searched = false,
     this.categoryWallpapers = const [],
     this.searchWallpapers = const [],
+    this.isLoadingMore = false,
+    this.hasReachedMax = false,
   });
 
   WallpaperLoaded copyWith({
     bool? searched,
     List<WallpaperEntity>? categoryWallpapers,
     List<WallpaperEntity>? searchWallpapers,
-    List<WallpaperEntity>? favoriteWallpapers,
+    bool? isLoadingMore,
+    bool? hasReachedMax,
   }) {
     return WallpaperLoaded(
       searched: searched ?? this.searched,
       categoryWallpapers: categoryWallpapers ?? this.categoryWallpapers,
       searchWallpapers: searchWallpapers ?? this.searchWallpapers,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax
     );
   }
 }

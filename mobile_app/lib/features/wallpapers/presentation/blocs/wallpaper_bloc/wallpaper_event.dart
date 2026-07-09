@@ -4,15 +4,20 @@ sealed class WallpaperEvent {}
 
 final class SearchWallpaper extends WallpaperEvent {
   final String query;
-  final int page;
 
-  SearchWallpaper({required this.query, required this.page});
+  SearchWallpaper({required this.query});
 }
 
-final class CuratedWallpaper extends WallpaperEvent {}
+final class SearchWallpaperLoadMore extends WallpaperEvent {
+  final String query;
+
+  SearchWallpaperLoadMore({required this.query});
+}
 
 final class CategoryWallpaper extends WallpaperEvent {
   final String query;
 
   CategoryWallpaper({required this.query});
 }
+
+final class ClearSearch extends WallpaperEvent {}

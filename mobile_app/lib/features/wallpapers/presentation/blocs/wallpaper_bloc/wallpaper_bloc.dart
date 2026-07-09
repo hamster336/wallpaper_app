@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_app/features/wallpapers/data/repositories/wallpaper_repository_impl.dart';
@@ -12,12 +13,23 @@ class WallpaperBloc extends Bloc<WallpaperEvent, WallpaperState> {
 
   WallpaperBloc({required this.repo}) : super(WallpaperInitial()) {
     on<SearchWallpaper>(_searchWallpaper);
+    on<SearchWallpaperLoadMore>(_searchWallpaperLoadMore);
     on<CategoryWallpaper>(_categoryWallpaper);
-    on<CuratedWallpaper>(_curatedWallpaper);
+    on<ClearSearch>(_clearSearch);
   }
 
+  int _currentPage = 1;
   final Map<String, List<WallpaperEntity>> cache =
-      {}; // to show live changes in UI
+      {}; // cache the category wallpapers
+  WallpaperLoaded? _lastLoadedState;
+
+  WallpaperLoaded _getLastLoadedState(WallpaperState state) {
+    if (state is WallpaperLoaded) {
+      return state;
+    }
+
+    return _lastLoadedState ?? WallpaperLoaded();
+  }
 
   // search wallpapers
   Future<void> _searchWallpaper(
@@ -25,97 +37,121 @@ class WallpaperBloc extends Bloc<WallpaperEvent, WallpaperState> {
     Emitter<WallpaperState> emit,
   ) async {
     try {
-      final currentState = state;
+      final previousState = _getLastLoadedState(state);
 
       emit(WallpaperLoading());
+
+      _currentPage = 1;
+
       final wallpapers = await repo.searchWallpaper(
         event.query,
-        page: event.page,
+        page: _currentPage,
       );
-      if (currentState is WallpaperLoaded) {
-        emit(
-          currentState.copyWith(searchWallpapers: wallpapers, searched: true),
-        );
-      } else {
-        emit(WallpaperLoaded(searchWallpapers: wallpapers, searched: true));
-      }
+
+      final nextState = previousState.copyWith(
+        searchWallpapers: wallpapers,
+        searched: true,
+      );
+      _lastLoadedState = nextState;
+      emit(nextState);
     } catch (e) {
       emit(WallpaperError(message: e.toString()));
     }
   }
 
-  // for the 'For you' category, show curated wallpaper
-  Future<void> _curatedWallpaper(
-    CuratedWallpaper event,
+  // to load more wallpapers as user scorlls
+  Future<void> _searchWallpaperLoadMore(
+    SearchWallpaperLoadMore event,
     Emitter<WallpaperState> emit,
   ) async {
-    final currentState = state;
-    emit(WallpaperLoading());
+    if (state is! WallpaperLoaded) return;
 
-    final key = 'for you';
+    final currentState = state as WallpaperLoaded;
 
+    final nextPage = _currentPage + 1;
     try {
-      final wallpapers = await repo.curatedWallpaper();
-      cache[key] = wallpapers;
-      if (currentState is WallpaperLoaded) {
-        emit(
-          currentState.copyWith(
-            categoryWallpapers: wallpapers,
-            searchWallpapers: [],
-          ),
-        );
-      } else {
-        emit(
-          WallpaperLoaded(categoryWallpapers: wallpapers, searchWallpapers: []),
-        );
-      }
+      emit(currentState.copyWith(isLoadingMore: true));
+
+      final wallpapers = await repo.searchWallpaper(
+        event.query,
+        page: _currentPage,
+      );
+
+      _currentPage = nextPage; // update only after successfully loading data
+
+      final combined = [...currentState.searchWallpapers, ...wallpapers];
+
+      await Future.delayed(Duration(seconds: 10));
+      emit(
+        currentState.copyWith(
+          searchWallpapers: combined,
+          searched: true,
+          isLoadingMore: false,
+          hasReachedMax: wallpapers.isEmpty,
+        ),
+      );
     } catch (e) {
       emit(WallpaperError(message: e.toString()));
+      emit(
+        currentState,
+      ); // on error, restore the previous state so user does not see a blank screen
     }
   }
 
-  // for rest of the categories
+  // for the categories
   Future<void> _categoryWallpaper(
     CategoryWallpaper event,
     Emitter<WallpaperState> emit,
   ) async {
-    final currentState = state;
+    final previousState = _getLastLoadedState(state);
+
     emit(WallpaperLoading());
 
     final key = event.query.trim().toLowerCase();
 
     if (cache.containsKey(key)) {
-      if (currentState is WallpaperLoaded) {
-        emit(currentState.copyWith(categoryWallpapers: cache[key]!));
-      } else {
-        emit(WallpaperLoaded(categoryWallpapers: cache[key]!));
-      }
+      final nextState = previousState.copyWith(
+        categoryWallpapers: cache[key]!,
+        searchWallpapers: [],
+        searched: false,
+      );
+      _lastLoadedState = nextState;
+      emit(nextState);
       return;
     }
 
     try {
-      List<WallpaperEntity> wallpapers = [];
-      if (event.query == "for you") {
-        wallpapers = await repo.curatedWallpaper();
-      } else {
-        wallpapers = await repo.searchWallpaper(event.query);
-      }
+      final wallpapers = (key == "for you")
+          ? await repo.curatedWallpaper()
+          : await repo.searchWallpaper(event.query);
 
       cache[key] = wallpapers;
-      if (currentState is WallpaperLoaded) {
-        emit(
-          currentState.copyWith(
-            categoryWallpapers: wallpapers,
-            searchWallpapers: [],
-          ),
-        );
-      } else {
-        emit(
-          WallpaperLoaded(categoryWallpapers: wallpapers, searchWallpapers: []),
-        );
-      }
+      final nextState = previousState.copyWith(
+        categoryWallpapers: wallpapers,
+        searchWallpapers: [],
+        searched: false,
+      );
+      _lastLoadedState = nextState;
+      await Future.delayed(Duration(seconds: 5));
+      emit(nextState);
     } catch (e) {
       emit(WallpaperError(message: e.toString()));
     }
+  }
+
+  // clear search
+  Future<void> _clearSearch(
+    ClearSearch event,
+    Emitter<WallpaperState> emit,
+  ) async {
+    final previousState = _getLastLoadedState(state);
+
+    final nextState = previousState.copyWith(
+      searchWallpapers: [],
+      searched: false,
+    );
+    _lastLoadedState = nextState;
+    emit(nextState);
+    log('search cleared');
   }
 }
