@@ -81,7 +81,6 @@ class WallpaperBloc extends Bloc<WallpaperEvent, WallpaperState> {
 
       final combined = [...currentState.searchWallpapers, ...wallpapers];
 
-      await Future.delayed(Duration(seconds: 10));
       emit(
         currentState.copyWith(
           searchWallpapers: combined,
@@ -132,7 +131,6 @@ class WallpaperBloc extends Bloc<WallpaperEvent, WallpaperState> {
         searched: false,
       );
       _lastLoadedState = nextState;
-      await Future.delayed(Duration(seconds: 5));
       emit(nextState);
     } catch (e) {
       emit(WallpaperError(message: e.toString()));
