@@ -44,7 +44,7 @@ class WallpaperBloc extends Bloc<WallpaperEvent, WallpaperState> {
       _currentPage = 1;
 
       final wallpapers = await repo.searchWallpaper(
-        event.query,
+        query: event.query,
         page: _currentPage,
       );
 
@@ -73,11 +73,11 @@ class WallpaperBloc extends Bloc<WallpaperEvent, WallpaperState> {
       emit(currentState.copyWith(isLoadingMore: true));
 
       final wallpapers = await repo.searchWallpaper(
-        event.query,
-        page: _currentPage,
+        query: event.query,
+        page: nextPage,
       );
 
-      _currentPage = nextPage; // update only after successfully loading data
+      _currentPage = nextPage; // change to the nextPage only after success
 
       final combined = [...currentState.searchWallpapers, ...wallpapers];
 
@@ -122,7 +122,7 @@ class WallpaperBloc extends Bloc<WallpaperEvent, WallpaperState> {
     try {
       final wallpapers = (key == "for you")
           ? await repo.curatedWallpaper()
-          : await repo.searchWallpaper(event.query);
+          : await repo.searchWallpaper(query: event.query, page: 1);
 
       cache[key] = wallpapers;
       final nextState = previousState.copyWith(

@@ -3,7 +3,7 @@ import * as pexelsService from "../services/pexels.services.js";
 // Search wallpapers
 export const searchWallpapers = async (req, res) => {
   try {
-    const { query, page = 1 } = req.query;
+    const { query, page = 1} = req.query;
 
     if (!query) {
       return res.status(400).json({ message: "Query parameter required" });

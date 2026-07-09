@@ -14,19 +14,19 @@ const pexelsAPI = axios.create({
 });
 
 // Search wallpapers
-export const searchWallpapers = async (query, page = 1, per_page = 20) => {
+export const searchWallpapers = async (query, page, per_page = 20) => {
   try {
-    const response = await pexelsAPI.get('/search', {
+    const response = await pexelsAPI.get("/search", {
       params: {
         query,
         page,
         per_page,
-        orientation: 'portrait', // mobile wallpaper ratio
+        orientation: "portrait", // mobile wallpaper ratio
       },
     });
     return response.data;
   } catch (error) {
-    console.log('Pexels API error: ' + error.message);
+    console.log("Pexels API error: " + error.message);
     throw error;
   }
 };
@@ -34,16 +34,16 @@ export const searchWallpapers = async (query, page = 1, per_page = 20) => {
 // Get curated wallpapers
 export const getCuratedWallpapers = async (page = 1, per_page = 20) => {
   try {
-    const response = await pexelsAPI.get('/curated', {
+    const response = await pexelsAPI.get("/curated", {
       params: {
         page,
         per_page,
-        orientation: 'portrait',
+        orientation: "portrait",
       },
     });
     return response.data;
   } catch (error) {
-    console.log('Pexels API error: ' + error.message);
+    console.log("Pexels API error: " + error.message);
     throw error;
   }
 };

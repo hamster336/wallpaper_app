@@ -22,8 +22,8 @@ class WallpaperRepositoryImpl extends WallpaperRepository {
   }
 
   @override
-  Future<List<WallpaperEntity>> searchWallpaper(
-    String query, {
+  Future<List<WallpaperEntity>> searchWallpaper({
+    required String query,
     int page = 1,
   }) async {
     final response = await remoteDataSource.searchWallpapers(query, page: page);

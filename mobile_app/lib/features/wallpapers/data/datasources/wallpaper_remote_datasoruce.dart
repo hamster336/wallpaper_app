@@ -15,10 +15,7 @@ class WallpaperRemoteDataSourceImpl extends WallpaperRemoteDatasoruce {
   WallpaperRemoteDataSourceImpl({required this.httpClient});
 
   @override
-  Future<List<WallpaperModel>> searchWallpapers(
-    String query, {
-    int page = 1,
-  }) async {
+  Future<List<WallpaperModel>> searchWallpapers(String query, {int page = 1}) async {
     try {
       final uri = Uri.parse(
         '${ApiConfig.baseUrl}/api/wallpapers/search?query=$query&page=$page',
